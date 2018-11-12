@@ -1,61 +1,71 @@
 <?php
-/*
-Plugin Name:  EJO Custom Block
-Plugin URI:   https://github.com/erikjoling/ejo-custom-block
-Description:  WordPress Plugin for a Custom Block. Made to learn block development
-Author:       Erik Joling <erik@ejoweb.nl>
-Version:      1.0-dev
-Author URI:   https://github.com/erikjoling/
-Text Domain:  ejo/custom-block
-Domain Path:  /assets/languages
-
-GitHub Plugin URI:  https://github.com/erikjoling/ejo-custom-block
-GitHub Branch:      master
-*/
+/**
+ * Plugin Name:  EJO Custom Block
+ * Plugin URI:   https://github.com/erikjoling/ejo-custom-block
+ * Description:  WordPress Plugin for a Custom Block. Made to learn block development
+ * Version:      1.0-dev
+ * Author:       Erik Joling <erik@ejoweb.nl>
+ * Author URI:   https://erik.joling.me/
+ * Text Domain:  ejo/custom-block
+ * Domain Path:  /resources/languages
+ * Requires PHP: 7
+ * License:      GPLv3
+ * 
+ * GitHub Plugin URI:  https://github.com/erikjoling/ejo-custom-block
+ * GitHub Branch:      master
+ */
 
 namespace Ejo\Custom_Block;
 
-final class Custom_Block {
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+/**
+ * Main class that bootstraps the plugin.
+ */
+final class Plugin {
 
     /**
      * Version
      *
-     * @access public
-     * @var    string
+     * @var string
      */
-    public $version = '';
+    private static $version = '';
 
     /**
      * File
      *
-     * @access public
-     * @var    string
+     * @var string
      */
-    public $plugin_file = '';
+    private static $file = '';
     
     /**
      * Directory path with trailing slash.
      *
-     * @access public
-     * @var    string
+     * @var string
      */
-    public $dir = '';
+    private static $dir = '';
 
     /**
      * Directory URI with trailing slash.
      *
-     * @access public
-     * @var    string
+     * @var string
      */
-    public $uri = '';
+    private static $uri = '';
 
     /**
-     * Menu slug
+     * Plugin identifier
      *
-     * @access public
-     * @var    string
+     * @var string
      */
-    public $slug = 'ejo/custom-block';
+    private static $id = '';
+
+    /**
+     * Constructor method.
+     *
+     * @access private
+     * @return void
+     */
+    private function __construct() {}
 
     /**
      * Returns the instance.
@@ -69,21 +79,11 @@ final class Custom_Block {
 
         if ( is_null( $instance ) ) {
             $instance = new self;
-            $instance->setup();
-            $instance->core();
-            $instance->setup_actions();
+            $instance::setup();
         }
 
         return $instance;
     }
-
-    /**
-     * Constructor method.
-     *
-     * @access private
-     * @return void
-     */
-    private function __construct() {}
 
     /**
      * Sets up.
@@ -91,84 +91,216 @@ final class Custom_Block {
      * @access private
      * @return void
      */
-    private function setup() {
+    private static function setup() {
+        
+        // Setting file has priority because other setters are dependant on it
+        static::set_file();
+        static::set_dir();
+        static::set_uri();
+        static::set_version();
+        static::set_id();
+        
+        // Inform WordPress of custom language directory
+        load_plugin_textdomain( 'ejo/custom-block', false, __DIR__ . '/resources/languages' );
 
-        // Main plugin file
-        $this->plugin_file = __FILE__;
+        // Give off the loaded hook for this plugin
+        do_action( static::get_id() . '_loaded' );
 
-        // Set the directory properties.
-        $this->dir = plugin_dir_path( $this->plugin_file );
-        $this->uri = plugin_dir_url( $this->plugin_file );
+        // Debug
+        // log(static::plugin_data());
+    }
 
-        // Use `get_file_data` because `get_plugin_data` doesn't work on the frontend
-        $plugin_data = get_file_data($this->plugin_file, array('Version' => 'Version'), false);
+    /*=============================================================*/
+    /**                     Getters & Setters                      */
+    /*=============================================================*/
+
+    /**
+     * Sets the plugin file
+     *
+     * @return void
+     */
+    private static function set_file() {
+        static::$file = __FILE__;
+    }
+
+    /**
+     * Gets the plugin file
+     *
+     * @return string
+     */
+    private static function get_file() {
+        return static::$file;
+    }
+
+    /**
+     * Sets the plugin directory
+     *
+     * @return void
+     */
+    private static function set_dir() {
+        static::$dir = plugin_dir_path( static::get_file() );
+    }
+
+    /**
+     * Gets the plugin directory path
+     *
+     * @return string
+     */
+    private static function get_dir() {
+        return static::$dir;
+    }
+
+    /**
+     * Sets the plugin URI
+     *
+     * @return void
+     */
+    private static function set_uri() {
+        static::$uri = plugin_dir_url( static::get_file() );
+    }
+
+    /**
+     * Gets the plugin uri path
+     *
+     * @return string
+     */
+    private static function get_uri() {
+        return static::$uri;
+    }
+
+    /**
+     * Sets the plugin ID
+     *
+     * @return void
+     */
+    private static function set_id() {
+        static::$id = basename(__DIR__);
+    }
+
+    /**
+     * Gets the plugin id
+     *
+     * @return string
+     */
+    private static function get_id() {
+        return static::$id;
+    }
+
+    /**
+     * Sets the plugin version
+     *
+     * @return void
+     */
+    private static function set_version() {
+
+        // Note: Can't use `get_plugin_data()` because it doesn't work on the frontend
+        $plugin_data = get_file_data( static::get_file(), array('Version' => 'Version') );
 
         // Set the version property
-        $this->version = $plugin_data['Version'];
-
-        // Inform WordPress of custom language directory
-        load_plugin_textdomain( 'ejo/custom-block', false, basename( dirname( $this->plugin_file ) ) . '/assets/languages' );
+        static::$version = $plugin_data['Version'];
     }
 
     /**
-     * Loads the core files.
+     * Gets the plugin version
      *
-     * @access private
-     * @return void
+     * @return string
      */
-    private function core() {
-
-        
+    private static function get_version() {
+        return static::$version;
     }
 
-    /**
-     * Adds the necessary setup actions for the theme.
-     *
-     * @access private
-     * @return void
-     */
-    private function setup_actions() {
 
-        // Activation and Deactivation of plugin
-        register_activation_hook( $this->plugin_file, array( $this, 'on_plugin_activation' ) );
-        register_deactivation_hook( $this->plugin_file, array( $this, 'on_plugin_deactivation' ) );
+    /*=============================================================*/
+    /**                    Plugin de/activation                    */
+    /*=============================================================*/
 
-        
-    }
+    public static function on_activation() {}
+    public static function on_deactivation() {}
+
+
+    /*=============================================================*/
+    /**                           Debug                            */
+    /*=============================================================*/
     
     /**
-     * Hook styles 'n scripts
+     * Debug plugin data
      *
-     * @access public
-     * @return void
+     * @return string
      */
-    public function enqueue_scripts() {
+    private static function plugin_data() {
 
-        $suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-        // Styles
-        // wp_enqueue_style( 'ejo-rsv-style', $this->uri ."assets/css/plugin{$suffix}.css", array(), $this->version );
-
-        // Scripts
-        // wp_enqueue_script( 'ejo-rsv-vendor', $this->uri ."assets/js/vendor{$suffix}.js", array( 'jquery' ), $this->version, true );
+        return [
+            'file'    => static::get_file(),
+            'dir'     => static::get_dir(),
+            'uri'     => static::get_uri(),
+            'id'      => static::get_id(),
+            'version' => static::get_version()
+        ];
     }
-
-
-    public function on_plugin_activation() {}
-    public function on_plugin_deactivation() {}
-
 }
 
 /**
- * Gets the instance of the `EJO_Core` class.  This function is useful for quickly grabbing data
+ * Gets the instance of the class.  This function is useful for quickly grabbing data
  * used throughout the framework.
  *
  * @access public
  * @return object
  */
-function boot() {
-    return Custom_Block::get_instance();
+function plugin() {
+    return Plugin::get_instance();
 }
 
-// Startup!
-boot();
+/**
+ * Load the plugin, when WP is loaded
+ */
+add_action('plugins_loaded', function(){
+    \Ejo\Custom_Block\plugin();
+});
+
+/**
+ * Registration & deactivation:
+ */
+register_activation_hook( __FILE__, function(){
+    \Ejo\Custom_Block\plugin()::on_activation();
+});
+register_deactivation_hook( __FILE__, function(){
+    \Ejo\Custom_Block\plugin()::on_deactivation();
+});
+
+
+/*=============================================================*/
+/**                         Debugging                          */
+/*=============================================================*/
+
+
+/** No need to check for function_exist because it is in namespace
+
+/**
+ * Print_R in a <pre> tag
+ */
+function dump( $arr ){
+    echo '<pre>';
+        print_r( $arr );
+    echo '</pre>';
+}
+
+/**
+ * Print_R in a <pre> tag and die
+ */
+function dd( $arr ){
+    dump( $arr );
+    die();
+}
+
+/**
+ * Log data to wp-content/debug.log
+ */
+function log( $data )  {
+    if ( true === WP_DEBUG ) {
+        if ( is_array( $data ) || is_object( $data ) ) {
+            error_log( print_r( $data, true ) );
+        } else {
+            error_log( $data );
+        }
+    }
+}
