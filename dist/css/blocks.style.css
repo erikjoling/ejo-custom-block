@@ -1,0 +1,17 @@
+[data-type="ejo/testblock"] .wp-block-ejo-testblock.test--reversed {
+  background-color: red; }
+
+[data-type="ejo/testblock"] .wp-block-ejo-testblock p {
+  background-color: #DDD;
+  padding: 1rem; }
+
+[data-type="ejo/testblock"] .wp-block-ejo-testblock .list {
+  margin-left: 1rem; }
+  [data-type="ejo/testblock"] .wp-block-ejo-testblock .list li {
+    border-bottom: 1px solid #DDD; }
+.wp-block-ejo-subpages li {
+  list-style-position: inside; }
+
+.wp-block-ejo-subpages .spinner {
+  float: none;
+  margin: 6px 2px 10px 0; }

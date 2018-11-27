@@ -80,6 +80,7 @@ final class Plugin {
         if ( is_null( $instance ) ) {
             $instance = new self;
             $instance::setup();
+            $instance::load();
         }
 
         return $instance;
@@ -103,11 +104,57 @@ final class Plugin {
         // Inform WordPress of custom language directory
         load_plugin_textdomain( 'ejo/custom-block', false, __DIR__ . '/resources/languages' );
 
+        // Debug
+        // log(static::debug_data());
+    }
+
+    /**
+     * Loads
+     *
+     * @access private
+     * @return void
+     */
+    private static function load() {
+
+        /**
+         * Frontend Assets
+         */
+        add_action( 'enqueue_block_assets', function(){
+
+            // Style
+            wp_enqueue_style(
+                \Ejo\Custom_Block\plugin()::get_id().'-style',
+                \Ejo\Custom_Block\plugin()::get_uri().'dist/css/blocks.style.css'
+            );
+        });
+
+        /**
+         * Editor Assets
+         */
+        add_action( 'enqueue_block_editor_assets', function(){
+
+            // Script
+            wp_enqueue_script( 
+                \Ejo\Custom_Block\plugin()::get_id().'-editor-scripts',
+                \Ejo\Custom_Block\plugin()::get_uri().'dist/js/editor.blocks.js',
+                [ 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-components' ],
+                time(), 
+                true
+            );
+
+            // Style
+            wp_enqueue_style(
+                \Ejo\Custom_Block\plugin()::get_id().'-editor-style',
+                \Ejo\Custom_Block\plugin()::get_uri().'dist/css/blocks.editor.css'
+            );
+
+        });
+
+        // Load subpages php-rendering setup
+        require_once( static::get_dir() . 'blocks/subpages/index.php' );
+        
         // Give off the loaded hook for this plugin
         do_action( static::get_id() . '_loaded' );
-
-        // Debug
-        // log(static::plugin_data());
     }
 
     /*=============================================================*/
@@ -128,7 +175,7 @@ final class Plugin {
      *
      * @return string
      */
-    private static function get_file() {
+    public static function get_file() {
         return static::$file;
     }
 
@@ -146,7 +193,7 @@ final class Plugin {
      *
      * @return string
      */
-    private static function get_dir() {
+    public static function get_dir() {
         return static::$dir;
     }
 
@@ -164,7 +211,7 @@ final class Plugin {
      *
      * @return string
      */
-    private static function get_uri() {
+    public static function get_uri() {
         return static::$uri;
     }
 
@@ -182,7 +229,7 @@ final class Plugin {
      *
      * @return string
      */
-    private static function get_id() {
+    public static function get_id() {
         return static::$id;
     }
 
@@ -193,7 +240,7 @@ final class Plugin {
      */
     private static function set_version() {
 
-        // Note: Can't use `get_plugin_data()` because it doesn't work on the frontend
+        // Note: Can't use `get_file_data()` because it doesn't work on the frontend
         $plugin_data = get_file_data( static::get_file(), array('Version' => 'Version') );
 
         // Set the version property
@@ -205,7 +252,7 @@ final class Plugin {
      *
      * @return string
      */
-    private static function get_version() {
+    public static function get_version() {
         return static::$version;
     }
 
@@ -225,9 +272,9 @@ final class Plugin {
     /**
      * Debug plugin data
      *
-     * @return string
+     * @return array
      */
-    private static function plugin_data() {
+    private static function debug_data() {
 
         return [
             'file'    => static::get_file(),

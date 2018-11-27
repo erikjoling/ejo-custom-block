@@ -1,0 +1,21 @@
+[data-type="ejo/testblock"] {
+
+    .wp-block-ejo-testblock {
+        &.test--reversed {
+            background-color: red;
+        }
+
+        p {
+            background-color: #DDD;
+            padding: 1rem;
+        }
+
+        .list {
+            margin-left: 1rem;
+
+            li {
+                border-bottom: 1px solid #DDD;
+            }
+        }
+    }    
+}
